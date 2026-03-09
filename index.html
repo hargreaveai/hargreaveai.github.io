@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paperboy AI â We deliver AI</title>
+    <meta name="description" content="Paperboy AI delivers artificial intelligence to businesses. Restaurants, personal builds, and fifteen years of reducing complexity into something that works.">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Paperboy AI â We deliver AI">
+    <meta property="og:description" content="We don't build AI. We deliver it. No jargon. No six-month rollouts.">
+    <meta property="og:url" content="https://hargreave.ai">
+    <meta name="twitter:card" content="summary">
+
+    <!-- Favicon (inline SVG data URI â newspaper icon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>ð°</text></svg>">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --text: #e8e8ed;
+            --muted: #6b6b7b;
+            --accent: #449DF7;
+            --accent-dim: rgba(68, 157, 247, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* Ambient orbs â visible when audio playing */
+        .orb-container {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0;
+            transition: opacity 5s ease;
+        }
+        .orb.active { opacity: 0.07; }
+        .orb-1 { width: 420px; height: 420px; background: #449DF7; top: 15%; left: 5%; }
+        .orb-2 { width: 320px; height: 320px; background: #5a7a6a; top: 55%; right: 10%; }
+        .orb-3 { width: 360px; height: 360px; background: #8a6a4a; bottom: 5%; left: 35%; }
+        .orb-4 { width: 260px; height: 260px; background: #4a5a7a; top: 5%; right: 25%; }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 0 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-bottom: 80px;
+        }
+
+        .brand {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 48px;
+        }
+
+        h1 {
+            font-size: clamp(32px, 6vw, 48px);
+            font-weight: 300;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            margin-bottom: 28px;
+        }
+
+        h1 strong {
+            font-weight: 600;
+        }
+
+        .sub {
+            font-size: 17px;
+            font-weight: 400;
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 480px;
+            margin-bottom: 48px;
+        }
+
+        .cta-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 64px;
+        }
+
+        .cta-row a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 22px;
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .cta-row a:first-child {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .cta-row a:first-child:hover {
+            background: #3a8de0;
+        }
+
+        .cta-row a:last-child:hover {
+            background: var(--accent-dim);
+            border-color: rgba(68, 157, 247, 0.2);
+        }
+
+        .cta-row a .arrow {
+            color: inherit;
+            opacity: 0.6;
+            transition: transform 0.2s, opacity 0.2s;
+            font-size: 13px;
+        }
+
+        .cta-row a:hover .arrow {
+            transform: translateX(3px);
+            opacity: 1;
+        }
+
+        /* Credibility strip â minimal, quiet authority */
+        .proof {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .proof span {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .proof .sep {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            flex-shrink: 0;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2;
+            background: linear-gradient(transparent, var(--bg) 40%);
+        }
+
+        .footer-left {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer span {
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* Ambient toggle pill */
+        .ambient-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 13px;
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        .ambient-toggle:hover {
+            border-color: rgba(68, 157, 247, 0.15);
+        }
+        .ambient-toggle.playing {
+            border-color: rgba(68, 157, 247, 0.25);
+        }
+        .ambient-toggle .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--muted);
+            transition: all 0.6s ease;
+        }
+        .ambient-toggle.playing .dot {
+            background: var(--accent);
+            box-shadow: 0 0 8px rgba(68, 157, 247, 0.4);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        .ambient-toggle span {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            transition: color 0.3s;
+        }
+        .ambient-toggle.playing span {
+            color: rgba(68, 157, 247, 0.6);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 480px) {
+            .page { padding: 0 20px; padding-bottom: 80px; }
+            .cta-row { flex-direction: column; }
+            .cta-row a { width: 100%; justify-content: space-between; }
+            .proof { gap: 16px; }
+            .proof .sep { display: none; }
+            .footer { padding: 14px 20px; }
+            .footer-left { gap: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb-container">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+</div>
+
+<div class="page">
+    <div class="brand">Paperboy AI</div>
+
+    <h1>We don't build AI.<br>We <strong>deliver</strong> it.</h1>
+
+    <p class="sub">AI consulting for people who need it working by next week, not next quarter. One person. Fifteen years of reducing complexity. Your AI, delivered.</p>
+
+    <div class="cta-row">
+        <a href="mailto:richard@hargreave.ai">
+            Start a conversation <span class="arrow">&rarr;</span>
+        </a>
+        <a href="https://www.upwork.com/freelancers/~richard" target="_blank" rel="noopener">
+            View on Upwork <span class="arrow">&rarr;</span>
+        </a>
+    </div>
+
+    <div class="proof">
+        <span>Restaurants</span>
+        <div class="sep"></div>
+        <span>Personal AI builds</span>
+        <div class="sep"></div>
+        <span>15 years reducing complexity</span>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="footer-left">
+        <span>&copy; Paperboy AI</span>
+        <span>hargreave.ai</span>
+    </div>
+    <div class="ambient-toggle" id="ambientBtn" onclick="toggleAmbient()" title="Generative ambient audio">
+        <div class="dot"></div>
+        <span>Listen</span>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// AMBIENT ENGINE: ENO MEETS LE CALAMAR
+// Generative ambient from 671 tracks across 3 playlists.
+// D minor / Phrygian / surf reverb / spaghetti western /
+// French chanson / Afrobeat ghost / desert noir.
+// ============================================================
+
+class AmbientEngine {
+  constructor() {
+    this.ctx = null;
+    this.master = null;
+    this.running = false;
+    this.timers = [];
+    this.activeNodes = [];
+  }
+
+  init() {
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.master = this.ctx.createGain();
+    this.master.gain.value = 0.5;
+    this.master.connect(this.ctx.destination);
+
+    this.plateConv = this.ctx.createConvolver();
+    this.plateConv.buffer = this.createReverbIR(5.0, 0.75, false);
+    const plateWet = this.ctx.createGain();
+    plateWet.gain.value = 0.55;
+    this.plateConv.connect(plateWet);
+    plateWet.connect(this.master);
+
+    this.springConv = this.ctx.createConvolver();
+    this.springConv.buffer = this.createReverbIR(1.8, 0.5, true);
+    const springWet = this.ctx.createGain();
+    springWet.gain.value = 0.35;
+    this.springConv.connect(springWet);
+    springWet.connect(this.master);
+    const springToPlate = this.ctx.createGain();
+    springToPlate.gain.value = 0.2;
+    this.springConv.connect(springToPlate);
+    springToPlate.connect(this.plateConv);
+
+    this.warmth = this.ctx.createWaveShaper();
+    this.warmth.curve = this.createSaturationCurve(0.3);
+    this.warmth.oversample = '2x';
+
+    this.toneFilter = this.ctx.createBiquadFilter();
+    this.toneFilter.type = 'lowpass';
+    this.toneFilter.frequency.value = 3200;
+    this.toneFilter.Q.value = 0.5;
+
+    this.dryGain = this.ctx.createGain();
+    this.dryGain.gain.value = 0.25;
+
+    this.warmth.connect(this.toneFilter);
+    this.toneFilter.connect(this.dryGain);
+    this.dryGain.connect(this.master);
+    this.toneFilter.connect(this.springConv);
+    this.toneFilter.connect(this.plateConv);
+  }
+
+  createReverbIR(duration, decay, isSpring) {
+    const rate = this.ctx.sampleRate;
+    const length = rate * duration;
+    const buffer = this.ctx.createBuffer(2, length, rate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < length; i++) {
+        let sample = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay * 3);
+        if (isSpring) {
+          const t = i / rate;
+          sample += Math.sin(t * 2400) * 0.02 * Math.exp(-t * 8);
+          sample += Math.sin(t * 3800) * 0.01 * Math.exp(-t * 12);
+          if (i < rate * 0.05) sample *= 2.5;
+        }
+        if (ch === 1) {
+          sample *= 0.97;
+          const offset = Math.min(i + 37, length - 1);
+          data[i] = sample * 0.5 + (Math.random() * 2 - 1) * Math.pow(1 - offset / length, decay * 3) * 0.5;
+        } else {
+          data[i] = sample;
+        }
+      }
+    }
+    return buffer;
+  }
+
+  createSaturationCurve(amount) {
+    const samples = 256;
+    const curve = new Float32Array(samples);
+    for (let i = 0; i < samples; i++) {
+      const x = (i * 2) / samples - 1;
+      curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+    }
+    return curve;
+  }
+
+  getScaleFreqs() {
+    return {
+      bass: [73.42, 110.00, 146.83],
+      mid: [146.83, 164.81, 174.61, 196.00, 220.00, 233.08, 261.63,
+            293.66, 329.63, 349.23, 392.00, 440.00, 466.16, 523.25],
+      high: [587.33, 659.25, 698.46, 880.00, 1174.66],
+      phrygian: [155.56, 233.08, 311.13, 466.16],
+      dorian: [246.94, 493.88],
+    };
+  }
+
+  playDrone() {
+    const freq = this.getScaleFreqs().bass[Math.floor(Math.random() * 3)];
+    const dur = 15 + Math.random() * 20;
+    const osc = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = freq;
+    osc2.type = 'sine'; osc2.frequency.value = freq * 1.002;
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.12, this.ctx.currentTime + 4);
+    gain.gain.setValueAtTime(0.12, this.ctx.currentTime + dur - 5);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + dur);
+    osc.connect(gain); osc2.connect(gain); gain.connect(this.warmth);
+    osc.start(); osc2.start();
+    osc.stop(this.ctx.currentTime + dur); osc2.stop(this.ctx.currentTime + dur);
+    this.activeNodes.push(osc, osc2);
+  }
+
+  playGuitarBell() {
+    const freqs = this.getScaleFreqs();
+    const pool = [...freqs.mid, ...freqs.high];
+    const freq = pool[Math.floor(Math.random() * pool.length)];
+    const dur = 4 + Math.random() * 6;
+    const carrier = this.ctx.createOscillator();
+    const modulator = this.ctx.createOscillator();
+    const modGain = this.ctx.createGain();
+    const gain = this.ctx.createGain();
+    carrier.type = 'sine'; carrier.frequency.value = freq;
+    modulator.type = 'sine'; modulator.frequency.value = freq * 2.01;
+    modGain.gain.value = freq * 0.5;
+    modulator.connect(modGain); modGain.connect(carrier.frequency);
+    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+    carrier.connect(gain); gain.connect(this.warmth);
+    carrier.start(); modulator.start();
+    carrier.stop(this.ctx.currentTime + dur); modulator.stop(this.ctx.currentTime + dur);
+    this.activeNodes.push(carrier, modulator);
+  }
+
+  playTremoloPad() {
+    const freq = this.getScaleFreqs().mid[Math.floor(Math.random() * 7)];
+    const dur = 10 + Math.random() * 15;
+    const osc = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const trem = this.ctx.createOscillator();
+    const tremGain = this.ctx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    osc2.type = 'sine'; osc2.frequency.value = freq * 2.005;
+    trem.type = 'sine'; trem.frequency.value = 3 + Math.random() * 3;
+    tremGain.gain.value = 0.03;
+    trem.connect(tremGain); tremGain.connect(gain.gain);
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.06, this.ctx.currentTime + 3);
+    gain.gain.setValueAtTime(0.06, this.ctx.currentTime + dur - 4);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + dur);
+    osc.connect(gain); osc2.connect(gain); gain.connect(this.warmth);
+    osc.start(); osc2.start(); trem.start();
+    osc.stop(this.ctx.currentTime + dur); osc2.stop(this.ctx.currentTime + dur);
+    trem.stop(this.ctx.currentTime + dur);
+    this.activeNodes.push(osc, osc2, trem);
+  }
+
+  playCinematicSwell() {
+    const freqs = this.getScaleFreqs();
+    const r = Math.random();
+    const pool = r < 0.15 ? freqs.phrygian : r < 0.25 ? freqs.dorian : freqs.mid.slice(3, 10);
+    const freq = pool[Math.floor(Math.random() * pool.length)];
+    const dur = 12 + Math.random() * 18;
+    const peak = dur * (0.3 + Math.random() * 0.4);
+    const osc = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth'; osc.frequency.value = freq;
+    osc2.type = 'sawtooth'; osc2.frequency.value = freq * 0.998;
+    const lf = this.ctx.createBiquadFilter();
+    lf.type = 'lowpass'; lf.frequency.value = 1200; lf.Q.value = 0.7;
+    lf.frequency.linearRampToValueAtTime(2000, this.ctx.currentTime + peak);
+    lf.frequency.linearRampToValueAtTime(800, this.ctx.currentTime + dur);
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, this.ctx.currentTime + peak);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + dur);
+    osc.connect(lf); osc2.connect(lf); lf.connect(gain); gain.connect(this.warmth);
+    osc.start(); osc2.start();
+    osc.stop(this.ctx.currentTime + dur); osc2.stop(this.ctx.currentTime + dur);
+    this.activeNodes.push(osc, osc2);
+  }
+
+  playGhostPerc() {
+    const dur = 8 + Math.random() * 12;
+    const bpm = 95 + Math.random() * 15;
+    const interval = 60 / bpm;
+    const hits = Math.floor(dur / interval);
+    for (let i = 0; i < hits; i++) {
+      const time = this.ctx.currentTime + (i * interval);
+      if (Math.random() < 0.4) continue;
+      const noise = this.ctx.createBufferSource();
+      const nb = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.05, this.ctx.sampleRate);
+      const nd = nb.getChannelData(0);
+      for (let j = 0; j < nd.length; j++) nd[j] = Math.random() * 2 - 1;
+      noise.buffer = nb;
+      const pf = this.ctx.createBiquadFilter();
+      pf.type = 'bandpass'; pf.frequency.value = 800 + Math.random() * 2000; pf.Q.value = 3;
+      const pg = this.ctx.createGain();
+      const vol = 0.008 + Math.random() * 0.012;
+      pg.gain.setValueAtTime(vol * Math.sin((i / hits) * Math.PI), time);
+      pg.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
+      noise.connect(pf); pf.connect(pg); pg.connect(this.warmth);
+      noise.start(time); noise.stop(time + 0.05);
+      this.activeNodes.push(noise);
+    }
+  }
+
+  playShimmer() {
+    const freq = this.getScaleFreqs().high[Math.floor(Math.random() * 5)];
+    const dur = 6 + Math.random() * 10;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.02, this.ctx.currentTime + 2);
+    gain.gain.setValueAtTime(0.02, this.ctx.currentTime + dur - 3);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + dur);
+    osc.connect(gain); gain.connect(this.warmth);
+    osc.start(); osc.stop(this.ctx.currentTime + dur);
+    this.activeNodes.push(osc);
+  }
+
+  start() {
+    if (!this.ctx) this.init();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    this.running = true;
+
+    const schedule = (fn, min, max) => {
+      const play = () => {
+        if (!this.running) return;
+        fn.call(this);
+        this.timers.push(setTimeout(play, (min + Math.random() * (max - min)) * 1000));
+      };
+      play();
+    };
+
+    schedule(this.playDrone, 18, 35);
+    schedule(this.playGuitarBell, 5, 12);
+    schedule(this.playTremoloPad, 14, 28);
+    schedule(this.playCinematicSwell, 20, 45);
+    schedule(this.playGhostPerc, 15, 30);
+    schedule(this.playShimmer, 8, 18);
+
+    document.querySelectorAll('.orb').forEach((orb, i) => {
+      setTimeout(() => orb.classList.add('active'), i * 800);
+      this.animateOrb(orb);
+    });
+  }
+
+  stop() {
+    this.running = false;
+    this.timers.forEach(t => clearTimeout(t));
+    this.timers = [];
+    if (this.master) {
+      this.master.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 2);
+      setTimeout(() => {
+        this.activeNodes.forEach(n => { try { n.stop(); } catch(e) {} });
+        this.activeNodes = [];
+        if (this.master) this.master.gain.value = 0.5;
+      }, 2500);
+    }
+    document.querySelectorAll('.orb').forEach(orb => orb.classList.remove('active'));
+  }
+
+  animateOrb(orb) {
+    const drift = () => {
+      if (!this.running) return;
+      const x = (Math.random() - 0.5) * 60;
+      const y = (Math.random() - 0.5) * 60;
+      const dur = 8000 + Math.random() * 12000;
+      orb.style.transition = `transform ${dur}ms ease-in-out, opacity 5s ease`;
+      orb.style.transform = `translate(${x}px, ${y}px)`;
+      setTimeout(drift, dur);
+    };
+    drift();
+  }
+}
+
+const engine = new AmbientEngine();
+let isPlaying = false;
+
+function toggleAmbient() {
+  const btn = document.getElementById('ambientBtn');
+  if (!isPlaying) {
+    engine.start();
+    btn.classList.add('playing');
+    btn.querySelector('span').textContent = 'Playing';
+  } else {
+    engine.stop();
+    btn.classList.remove('playing');
+    btn.querySelector('span').textContent = 'Listen';
+  }
+  isPlaying = !isPlaying;
+}
+</script>
+
+</body>
+</html>

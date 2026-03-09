@@ -22,12 +22,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg: #0a0a0f;
-            --surface: #12121a;
-            --text: #e8e8ed;
-            --muted: #6b6b7b;
-            --accent: #449DF7;
-            --accent-dim: rgba(68, 157, 247, 0.08);
+            --bg: #0c0a08;
+            --surface: #15120f;
+            --text: #e8e5e0;
+            --muted: #7a6e65;
+            --accent: #E15836;
+            --accent-dim: rgba(225, 88, 54, 0.08);
         }
 
         body {
@@ -55,10 +55,10 @@
             transition: opacity 5s ease;
         }
         .orb.active { opacity: 0.07; }
-        .orb-1 { width: 420px; height: 420px; background: #449DF7; top: 15%; left: 5%; }
-        .orb-2 { width: 320px; height: 320px; background: #5a7a6a; top: 55%; right: 10%; }
-        .orb-3 { width: 360px; height: 360px; background: #8a6a4a; bottom: 5%; left: 35%; }
-        .orb-4 { width: 260px; height: 260px; background: #4a5a7a; top: 5%; right: 25%; }
+        .orb-1 { width: 420px; height: 420px; background: #E15836; top: 15%; left: 5%; }
+        .orb-2 { width: 320px; height: 320px; background: #E9B244; top: 55%; right: 10%; }
+        .orb-3 { width: 360px; height: 360px; background: #342019; bottom: 5%; left: 35%; }
+        .orb-4 { width: 260px; height: 260px; background: #8a5a3a; top: 5%; right: 25%; }
 
         .page {
             position: relative;
@@ -132,12 +132,12 @@
         }
 
         .cta-row a:first-child:hover {
-            background: #3a8de0;
+            background: #c94a2e;
         }
 
         .cta-row a:last-child:hover {
             background: var(--accent-dim);
-            border-color: rgba(68, 157, 247, 0.2);
+            border-color: rgba(225, 88, 54, 0.2);
         }
 
         .cta-row a .arrow {
@@ -214,10 +214,10 @@
             user-select: none;
         }
         .ambient-toggle:hover {
-            border-color: rgba(68, 157, 247, 0.15);
+            border-color: rgba(225, 88, 54, 0.15);
         }
         .ambient-toggle.playing {
-            border-color: rgba(68, 157, 247, 0.25);
+            border-color: rgba(225, 88, 54, 0.25);
         }
         .ambient-toggle .dot {
             width: 6px;
@@ -228,7 +228,7 @@
         }
         .ambient-toggle.playing .dot {
             background: var(--accent);
-            box-shadow: 0 0 8px rgba(68, 157, 247, 0.4);
+            box-shadow: 0 0 8px rgba(225, 88, 54, 0.4);
             animation: pulse 3s ease-in-out infinite;
         }
         .ambient-toggle span {
@@ -239,7 +239,7 @@
             transition: color 0.3s;
         }
         .ambient-toggle.playing span {
-            color: rgba(68, 157, 247, 0.6);
+            color: rgba(225, 88, 54, 0.6);
         }
 
         @keyframes pulse {

@@ -3,43 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paperboy AI — We deliver AI</title>
-    <meta name="description" content="Paperboy AI delivers artificial intelligence to businesses. Restaurants, personal builds, and fifteen years of reducing complexity into something that works.">
+    <title>paperboy ai &mdash; we make ai work for you</title>
+    <meta name="description" content="paperboy ai makes artificial intelligence work for you. no jargon. no six-month rollouts. one real person delivering ai to your door.">
 
     <!-- Open Graph / Social -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Paperboy AI — We deliver AI">
-    <meta property="og:description" content="We don't build AI. We deliver it. No jargon. No six-month rollouts.">
+    <meta property="og:title" content="paperboy ai &mdash; we make ai work for you">
+    <meta property="og:description" content="we make ai work for you. no jargon. no six-month rollouts. one real person.">
     <meta property="og:url" content="https://hargreave.ai">
     <meta name="twitter:card" content="summary">
 
-    <!-- Favicon (inline SVG data URI — newspaper icon) -->
+    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📰</text></svg>">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg: #0c0a08;
-            --surface: #15120f;
-            --text: #e8e5e0;
-            --muted: #7a6e65;
-            --accent: #E15836;
-            --accent-dim: rgba(225, 88, 54, 0.08);
+            --azure: #B4CCCF;
+            --azure-light: #c8dadc;
+            --azure-dark: #96b2b6;
+            --indigo: #28536B;
+            --indigo-muted: #46738d;
+            --indigo-dim: rgba(40, 83, 107, 0.06);
         }
 
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background: var(--azure);
+            color: var(--indigo);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
         }
 
-        /* Ambient orbs — visible when audio playing */
+        /* Subtle ambient orbs — azure tones */
         .orb-container {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -50,98 +50,97 @@
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(90px);
+            filter: blur(100px);
             opacity: 0;
-            transition: opacity 5s ease;
+            transition: opacity 6s ease;
         }
-        .orb.active { opacity: 0.07; }
-        .orb-1 { width: 420px; height: 420px; background: #E15836; top: 15%; left: 5%; }
-        .orb-2 { width: 320px; height: 320px; background: #E9B244; top: 55%; right: 10%; }
-        .orb-3 { width: 360px; height: 360px; background: #342019; bottom: 5%; left: 35%; }
-        .orb-4 { width: 260px; height: 260px; background: #8a5a3a; top: 5%; right: 25%; }
+        .orb.active { opacity: 0.15; }
+        .orb-1 { width: 500px; height: 500px; background: #a0c0c4; top: 10%; left: 0%; }
+        .orb-2 { width: 400px; height: 400px; background: #c8dadc; top: 50%; right: 5%; }
+        .orb-3 { width: 450px; height: 450px; background: #8fb0b5; bottom: 0%; left: 30%; }
 
         .page {
             position: relative;
             z-index: 1;
-            max-width: 640px;
+            max-width: 700px;
             margin: 0 auto;
             padding: 0 24px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: center;
             justify-content: center;
+            text-align: center;
             padding-bottom: 80px;
         }
 
-        .brand {
-            font-size: clamp(22px, 4vw, 32px);
-            font-weight: 600;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 48px;
+        /* Header — services, smallest, top */
+        .services {
+            font-family: 'Fredoka One', cursive;
+            font-size: 13px;
+            color: var(--indigo-muted);
+            letter-spacing: 0.5px;
+            margin-bottom: 80px;
         }
 
-        h1 {
-            font-size: clamp(32px, 6vw, 48px);
-            font-weight: 300;
-            line-height: 1.2;
-            letter-spacing: -0.5px;
-            margin-bottom: 28px;
+        /* Centrepiece — paperboy ai wordmark */
+        .wordmark {
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(52px, 10vw, 96px);
+            color: var(--indigo);
+            line-height: 1.1;
+            margin-bottom: 24px;
         }
 
-        h1 strong {
-            font-weight: 600;
+        /* Tagline — child's voice */
+        .tagline {
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(16px, 3vw, 22px);
+            color: var(--indigo-muted);
+            margin-bottom: 60px;
         }
 
-        .sub {
-            font-size: 17px;
-            font-weight: 400;
-            color: var(--muted);
-            line-height: 1.7;
-            max-width: 480px;
-            margin-bottom: 48px;
-        }
-
+        /* Action buttons */
         .cta-row {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 64px;
+            justify-content: center;
+            margin-bottom: 48px;
         }
 
         .cta-row a {
-            color: var(--text);
+            color: var(--azure);
             text-decoration: none;
+            font-family: 'Fredoka One', cursive;
             font-size: 14px;
-            font-weight: 500;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            padding: 13px 22px;
-            background: var(--surface);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            padding: 14px 28px;
+            background: var(--indigo);
+            border: 2px solid var(--indigo);
+            border-radius: 40px;
+            transition: all 0.25s ease;
         }
 
-        .cta-row a:first-child {
-            background: var(--accent);
-            color: #fff;
-            border-color: var(--accent);
+        .cta-row a:hover {
+            background: var(--indigo-muted);
+            border-color: var(--indigo-muted);
+            transform: translateY(-1px);
         }
 
-        .cta-row a:first-child:hover {
-            background: #c94a2e;
+        .cta-row a.secondary {
+            background: transparent;
+            color: var(--indigo);
+            border: 2px solid var(--indigo);
         }
 
-        .cta-row a:last-child:hover {
-            background: var(--accent-dim);
-            border-color: rgba(225, 88, 54, 0.2);
+        .cta-row a.secondary:hover {
+            background: var(--indigo-dim);
         }
 
         .cta-row a .arrow {
-            color: inherit;
             opacity: 0.6;
             transition: transform 0.2s, opacity 0.2s;
             font-size: 13px;
@@ -150,30 +149,6 @@
         .cta-row a:hover .arrow {
             transform: translateX(3px);
             opacity: 1;
-        }
-
-        /* Credibility strip — minimal, quiet authority */
-        .proof {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .proof span {
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            color: var(--muted);
-            white-space: nowrap;
-        }
-
-        .proof .sep {
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.12);
-            flex-shrink: 0;
         }
 
         .footer {
@@ -186,7 +161,7 @@
             justify-content: space-between;
             align-items: center;
             z-index: 2;
-            background: linear-gradient(transparent, var(--bg) 40%);
+            background: linear-gradient(transparent, var(--azure) 40%);
         }
 
         .footer-left {
@@ -196,8 +171,8 @@
 
         .footer span {
             font-size: 11px;
-            color: var(--muted);
-            letter-spacing: 0.5px;
+            color: var(--indigo-muted);
+            letter-spacing: 0.3px;
         }
 
         /* Ambient toggle pill */
@@ -206,40 +181,40 @@
             align-items: center;
             gap: 8px;
             padding: 7px 13px;
-            background: var(--surface);
-            border: 1px solid rgba(255,255,255,0.04);
+            background: rgba(40, 83, 107, 0.06);
+            border: 1px solid rgba(40, 83, 107, 0.12);
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
             user-select: none;
         }
         .ambient-toggle:hover {
-            border-color: rgba(225, 88, 54, 0.15);
+            border-color: rgba(40, 83, 107, 0.25);
         }
         .ambient-toggle.playing {
-            border-color: rgba(225, 88, 54, 0.25);
+            border-color: rgba(40, 83, 107, 0.35);
         }
         .ambient-toggle .dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: var(--muted);
+            background: var(--indigo-muted);
             transition: all 0.6s ease;
         }
         .ambient-toggle.playing .dot {
-            background: var(--accent);
-            box-shadow: 0 0 8px rgba(225, 88, 54, 0.4);
+            background: var(--indigo);
+            box-shadow: 0 0 8px rgba(40, 83, 107, 0.4);
             animation: pulse 3s ease-in-out infinite;
         }
         .ambient-toggle span {
             font-size: 10px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: var(--muted);
+            letter-spacing: 1px;
+            color: var(--indigo-muted);
             transition: color 0.3s;
+            font-family: 'Fredoka One', cursive;
         }
         .ambient-toggle.playing span {
-            color: rgba(225, 88, 54, 0.6);
+            color: var(--indigo);
         }
 
         @keyframes pulse {
@@ -249,10 +224,9 @@
 
         @media (max-width: 480px) {
             .page { padding: 0 20px; padding-bottom: 80px; }
-            .cta-row { flex-direction: column; }
-            .cta-row a { width: 100%; justify-content: space-between; }
-            .proof { gap: 16px; }
-            .proof .sep { display: none; }
+            .services { margin-bottom: 60px; }
+            .cta-row { flex-direction: column; width: 100%; }
+            .cta-row a { width: 100%; justify-content: center; }
             .footer { padding: 14px 20px; }
             .footer-left { gap: 14px; }
         }
@@ -264,42 +238,33 @@
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
-    <div class="orb orb-4"></div>
 </div>
 
 <div class="page">
-    <div class="brand">Paperboy AI</div>
+    <div class="services">custom ai prompts &middot; workflows &middot; automation</div>
 
-    <h1>We don't build AI.<br>We deliver it.</h1>
+    <div class="wordmark">paperboy ai</div>
 
-    <p class="sub">AI consulting for people who need it working by next week, not next quarter. One real person. Fifteen years of reducing complexity. Your AI, delivered.</p>
+    <div class="tagline">we make ai work for you</div>
 
     <div class="cta-row">
         <a href="mailto:richard@hargreave.ai">
-            Start a conversation <span class="arrow">&rarr;</span>
+            start a conversation <span class="arrow">&rarr;</span>
         </a>
-        <a href="https://www.upwork.com/freelancers/~richard" target="_blank" rel="noopener">
-            View on Upwork <span class="arrow">&rarr;</span>
+        <a href="https://www.upwork.com/freelancers/~richard" target="_blank" rel="noopener" class="secondary">
+            view on upwork <span class="arrow">&rarr;</span>
         </a>
-    </div>
-
-    <div class="proof">
-        <span>Restaurants</span>
-        <div class="sep"></div>
-        <span>Personal AI builds</span>
-        <div class="sep"></div>
-        <span>15 years reducing complexity</span>
     </div>
 </div>
 
 <div class="footer">
     <div class="footer-left">
-        <span>&copy; Paperboy AI</span>
+        <span>&copy; paperboy ai</span>
         <span>hargreave.ai</span>
     </div>
-    <div class="ambient-toggle" id="ambientBtn" onclick="toggleAmbient()" title="Generative ambient audio">
+    <div class="ambient-toggle" id="ambientBtn" onclick="toggleAmbient()" title="generative ambient audio">
         <div class="dot"></div>
-        <span>Listen</span>
+        <span>listen</span>
     </div>
 </div>
 
@@ -586,7 +551,7 @@ class AmbientEngine {
       const x = (Math.random() - 0.5) * 60;
       const y = (Math.random() - 0.5) * 60;
       const dur = 8000 + Math.random() * 12000;
-      orb.style.transition = `transform ${dur}ms ease-in-out, opacity 5s ease`;
+      orb.style.transition = `transform ${dur}ms ease-in-out, opacity 6s ease`;
       orb.style.transform = `translate(${x}px, ${y}px)`;
       setTimeout(drift, dur);
     };
@@ -602,16 +567,16 @@ function toggleAmbient() {
   if (!isPlaying) {
     engine.start();
     btn.classList.add('playing');
-    btn.querySelector('span').textContent = 'Playing';
+    btn.querySelector('span').textContent = 'playing';
   } else {
     engine.stop();
     btn.classList.remove('playing');
-    btn.querySelector('span').textContent = 'Listen';
+    btn.querySelector('span').textContent = 'listen';
   }
   isPlaying = !isPlaying;
 }
 
-// Auto-start ambient on first user interaction (browsers require gesture for AudioContext)
+// Auto-start ambient on first user interaction
 const autoStart = () => {
   if (!isPlaying) toggleAmbient();
   document.removeEventListener('click', autoStart);

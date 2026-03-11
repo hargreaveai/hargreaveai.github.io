@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paperboy AI &mdash; We deliver AI</title>
+    <title>Paperboy AI — We deliver AI</title>
     <meta name="description" content="Paperboy AI delivers artificial intelligence to businesses. Restaurants, personal builds, and fifteen years of reducing complexity into something that works.">
 
     <!-- Open Graph / Social -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Paperboy AI &mdash; We deliver AI">
+    <meta property="og:title" content="Paperboy AI — We deliver AI">
     <meta property="og:description" content="We don't build AI. We deliver it. No jargon. No six-month rollouts.">
     <meta property="og:url" content="https://hargreave.ai">
     <meta name="twitter:card" content="summary">
 
-    <!-- Favicon (inline SVG data URI -- newspaper icon) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%93%B0</text></svg>">
+    <!-- Favicon (inline SVG data URI — newspaper icon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📰</text></svg>">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -39,7 +39,7 @@
             overflow-x: hidden;
         }
 
-        /* Ambient orbs -- visible when audio playing */
+        /* Ambient orbs — visible when audio playing */
         .orb-container {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -74,7 +74,7 @@
         }
 
         .brand {
-            font-size: 11px;
+            font-size: clamp(22px, 4vw, 32px);
             font-weight: 600;
             letter-spacing: 3px;
             text-transform: uppercase;
@@ -152,7 +152,7 @@
             opacity: 1;
         }
 
-        /* Credibility strip -- minimal, quiet authority */
+        /* Credibility strip — minimal, quiet authority */
         .proof {
             display: flex;
             gap: 24px;
@@ -270,9 +270,9 @@
 <div class="page">
     <div class="brand">Paperboy AI</div>
 
-    <h1>We don't build AI.<br>We <strong>deliver</strong> it.</h1>
+    <h1>We don't build AI.<br>We deliver it.</h1>
 
-    <p class="sub">AI consulting for people who need it working by next week, not next quarter. One person. Fifteen years of reducing complexity. Your AI, delivered.</p>
+    <p class="sub">AI consulting for people who need it working by next week, not next quarter. One real person. Fifteen years of reducing complexity. Your AI, delivered.</p>
 
     <div class="cta-row">
         <a href="mailto:richard@hargreave.ai">
@@ -610,6 +610,17 @@ function toggleAmbient() {
   }
   isPlaying = !isPlaying;
 }
+
+// Auto-start ambient on first user interaction (browsers require gesture for AudioContext)
+const autoStart = () => {
+  if (!isPlaying) toggleAmbient();
+  document.removeEventListener('click', autoStart);
+  document.removeEventListener('scroll', autoStart);
+  document.removeEventListener('touchstart', autoStart);
+};
+document.addEventListener('click', autoStart);
+document.addEventListener('scroll', autoStart);
+document.addEventListener('touchstart', autoStart);
 </script>
 
 </body>

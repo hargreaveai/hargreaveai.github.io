@@ -568,6 +568,74 @@ class LeCalamEngine {
     this.activeNodes.push(osc);
   }
 
+  // 7. GLASS BEAMS — Crystalline harmonic columns, cold and pure
+  // Inspired by Eno's Music for Airports — sustained high sine tones with micro-vibrato
+  // Like light through glass: bright, still, faintly alive
+  playGlassBeams() {
+    const duration = 12 + Math.random() * 22; // 12-34s — long, very Eno
+
+    // Glass-register frequencies: high D minor harmonics
+    // D6=1174, E6=1318, F6=1396, A6=1760, D7=2349
+    const glassFreqs = [1046.50, 1174.66, 1318.51, 1396.91, 1568.00, 1760.00, 2349.32];
+
+    // Play 2-3 tones together — a chord of glass
+    const chordSize = 2 + Math.floor(Math.random() * 2);
+    const rootIdx = Math.floor(Math.random() * (glassFreqs.length - chordSize));
+
+    // Bypass warmth — glass is cold and bright, not tape-warm
+    const glassGain = this.ctx.createGain();
+    glassGain.gain.setValueAtTime(0, this.ctx.currentTime);
+    glassGain.gain.linearRampToValueAtTime(0.035, this.ctx.currentTime + 4); // Very slow attack
+    glassGain.gain.setValueAtTime(0.035, this.ctx.currentTime + duration - 5);
+    glassGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+
+    // Feed direct to plate reverb — glass in a room, not through tape
+    glassGain.connect(this.plateConv);
+    // Small dry signal for presence
+    const glassDry = this.ctx.createGain();
+    glassDry.gain.value = 0.08;
+    glassGain.connect(glassDry);
+    glassDry.connect(this.master);
+
+    for (let i = 0; i < chordSize; i++) {
+      const freq = glassFreqs[rootIdx + i];
+
+      // Two oscillators with near-zero detune — glass beating frequency
+      const osc = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      osc.type = 'sine';
+      osc2.type = 'sine';
+      osc.frequency.value = freq;
+      osc2.frequency.value = freq * 1.0005; // 0.05% detune — the glass shimmer
+
+      // Very slow vibrato (0.2-0.5 Hz) — glass wobbles faintly when bowed
+      const vibLFO = this.ctx.createOscillator();
+      const vibDepth = this.ctx.createGain();
+      vibLFO.type = 'sine';
+      vibLFO.frequency.value = 0.2 + Math.random() * 0.3;
+      vibDepth.gain.value = freq * 0.002; // Tiny pitch movement
+      vibLFO.connect(vibDepth);
+      vibDepth.connect(osc.frequency);
+
+      // Higher partials are quieter — physics of resonance
+      const partialGain = this.ctx.createGain();
+      partialGain.gain.value = 0.7 / (i + 1);
+
+      osc.connect(partialGain);
+      osc2.connect(partialGain);
+      partialGain.connect(glassGain);
+
+      osc.start();
+      osc2.start();
+      vibLFO.start();
+      osc.stop(this.ctx.currentTime + duration);
+      osc2.stop(this.ctx.currentTime + duration);
+      vibLFO.stop(this.ctx.currentTime + duration);
+
+      this.activeNodes.push(osc, osc2, vibLFO);
+    }
+  }
+
   // === ENGINE CONTROL ===
 
   start() {
@@ -608,6 +676,9 @@ class LeCalamEngine {
 
     // Shimmer: every 8-18s (the Eno crystal)
     schedule(this.playShimmer, 8, 18);
+
+    // Glass beams: every 15-30s (crystalline harmonic columns)
+    schedule(this.playGlassBeams, 15, 30);
 
     // Activate orbs
     document.querySelectorAll('.orb').forEach((orb, i) => {

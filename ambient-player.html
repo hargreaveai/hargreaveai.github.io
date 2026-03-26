@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="Generative ambient music. Eno meets Le Calamar.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<title>Paperboy AI — Ambient</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    color: #e8e4dc;
+    font-family: 'Georgia', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Floating orbs background */
+  .orb-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0;
+    transition: opacity 4s ease;
+  }
+  .orb.active { opacity: 0.12; }
+  .orb-1 { width: 400px; height: 400px; background: #C4922A; top: 20%; left: 10%; }
+  .orb-2 { width: 300px; height: 300px; background: #5a7a6a; top: 60%; right: 15%; }
+  .orb-3 { width: 350px; height: 350px; background: #8a6a4a; bottom: 10%; left: 40%; }
+  .orb-4 { width: 250px; height: 250px; background: #4a5a7a; top: 10%; right: 30%; }
+  .orb-5 { width: 280px; height: 280px; background: #7a4a4a; top: 45%; left: 55%; }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .title {
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #C4922A;
+    margin-bottom: 30px;
+    opacity: 0.7;
+  }
+
+  .play-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid rgba(196, 146, 42, 0.4);
+    background: rgba(196, 146, 42, 0.08);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    transition: all 0.6s ease;
+    position: relative;
+  }
+  .play-btn:hover {
+    border-color: rgba(196, 146, 42, 0.7);
+    background: rgba(196, 146, 42, 0.15);
+  }
+  .play-btn.playing {
+    animation: breathe 4s ease-in-out infinite;
+  }
+  .play-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: #C4922A;
+    transition: opacity 0.3s;
+  }
+
+  @keyframes breathe {
+    0%, 100% { box-shadow: 0 0 20px rgba(196, 146, 42, 0.1); transform: scale(1); }
+    50% { box-shadow: 0 0 40px rgba(196, 146, 42, 0.2); transform: scale(1.03); }
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: rgba(232, 228, 220, 0.35);
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+    font-style: italic;
+  }
+
+  .volume-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .volume-wrap.visible { opacity: 1; }
+
+  .vol-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(196, 146, 42, 0.4);
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 120px;
+    height: 1px;
+    background: rgba(196, 146, 42, 0.3);
+    outline: none;
+    border-radius: 1px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #C4922A;
+    cursor: pointer;
+  }
+
+  /* Squarespace widget mode */
+  .sq-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+  }
+  .sq-widget .play-btn { width: 48px; height: 48px; }
+  .sq-widget .play-btn svg { width: 14px; height: 14px; }
+  .sq-widget .title, .sq-widget .subtitle { display: none; }
+</style>
+</head>
+<body>
+
+<div class="orb-container">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+  <div class="orb orb-5"></div>
+</div>
+
+<div class="content">
+  <div class="title">Paperboy AI</div>
+  <div class="play-btn" id="playBtn" onclick="toggleAudio()">
+    <svg id="playIcon" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19"/></svg>
+    <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
+  </div>
+  <div class="subtitle">sounds of le calamar</div>
+  <div class="volume-wrap" id="volWrap">
+    <span class="vol-label">Vol</span>
+    <input type="range" id="volSlider" min="0" max="100" value="60" oninput="setVol(this.value)">
+  </div>
+</div>
+
+<script>
+// ============================================================
+// AMBIENT ENGINE v2: ENO MEETS LE CALAMAR
+// ============================================================
+// Generative ambient music based on 671 tracks across 3
+// "Sounds of Le Calamar" playlists. The harmonic DNA:
+// D minor / A minor / Phrygian touches / surf reverb /
+// spaghetti western space / French chanson warmth /
+// Afrobeat ghost grooves / desert noir hypnosis.
+// ============================================================
+
+class LeCalamEngine {
+  constructor() {
+    this.ctx = null;
+    this.master = null;
+    this.running = false;
+    this.timers = [];
+    this.activeNodes = [];
+  }
+
+  init() {
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // === SIGNAL CHAIN ===
+    // voices → warmth (saturation) → spring reverb → plate reverb → master
+
+    // Master gain
+    this.master = this.ctx.createGain();
+    this.master.gain.value = 0.6;
+    this.master.connect(this.ctx.destination);
+
+    // Plate reverb (long Eno-style tail)
+    this.plateConv = this.ctx.createConvolver();
+    this.plateConv.buffer = this.createReverbIR(5.0, 0.75, false);
+    const plateWet = this.ctx.createGain();
+    plateWet.gain.value = 0.55;
+    this.plateConv.connect(plateWet);
+    plateWet.connect(this.master);
+
+    // Spring reverb (short, bright — surf guitar character)
+    this.springConv = this.ctx.createConvolver();
+    this.springConv.buffer = this.createReverbIR(1.8, 0.5, true);
+    const springWet = this.ctx.createGain();
+    springWet.gain.value = 0.35;
+    this.springConv.connect(springWet);
+    springWet.connect(this.master);
+    // Spring also feeds into plate for depth
+    const springToPlate = this.ctx.createGain();
+    springToPlate.gain.value = 0.2;
+    this.springConv.connect(springToPlate);
+    springToPlate.connect(this.plateConv);
+
+    // Warmth filter (tape saturation simulation via waveshaper + lowpass)
+    this.warmth = this.ctx.createWaveShaper();
+    this.warmth.curve = this.createSaturationCurve(0.3);
+    this.warmth.oversample = '2x';
+
+    // Tone shaping — roll off harsh highs, Le Calamar is warm
+    this.toneFilter = this.ctx.createBiquadFilter();
+    this.toneFilter.type = 'lowpass';
+    this.toneFilter.frequency.value = 3200;
+    this.toneFilter.Q.value = 0.5;
+
+    // Dry path
+    this.dryGain = this.ctx.createGain();
+    this.dryGain.gain.value = 0.25;
+
+    // Routing: warmth → tone → dry + spring + plate
+    this.warmth.connect(this.toneFilter);
+    this.toneFilter.connect(this.dryGain);
+    this.dryGain.connect(this.master);
+    this.toneFilter.connect(this.springConv);
+    this.toneFilter.connect(this.plateConv);
+  }
+
+  // === REVERB IMPULSE RESPONSE GENERATORS ===
+
+  createReverbIR(duration, decay, isSpring) {
+    const rate = this.ctx.sampleRate;
+    const length = rate * duration;
+    const buffer = this.ctx.createBuffer(2, length, rate);
+
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < length; i++) {
+        let sample = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay * 3);
+
+        if (isSpring) {
+          // Spring reverb: add metallic resonance peaks
+          const t = i / rate;
+          sample += Math.sin(t * 2400) * 0.02 * Math.exp(-t * 8);
+          sample += Math.sin(t * 3800) * 0.01 * Math.exp(-t * 12);
+          // Characteristic spring 'drip' in early reflections
+          if (i < rate * 0.05) {
+            sample *= 2.5;
+          }
+        }
+
+        // Slight stereo decorrelation
+        if (ch === 1) {
+          sample *= 0.97;
+          // Offset phase slightly for width
+          const offset = Math.min(i + 37, length - 1);
+          data[i] = sample * 0.5 + (Math.random() * 2 - 1) * Math.pow(1 - offset / length, decay * 3) * 0.5;
+        } else {
+          data[i] = sample;
+        }
+      }
+    }
+    return buffer;
+  }
+
+  createSaturationCurve(amount) {
+    const samples = 256;
+    const curve = new Float32Array(samples);
+    for (let i = 0; i < samples; i++) {
+      const x = (i * 2) / samples - 1;
+      // Soft clipping with even harmonics (tape character)
+      curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+    }
+    return curve;
+  }
+
+  // === LE CALAMAR SCALE SYSTEM ===
+  // Based on the harmonic DNA of 671 tracks:
+  // D minor natural with Phrygian Bb, Dorian B♮, and leading tone C#
+
+  getScaleFreqs() {
+    return {
+      // Bass register (drones) — D2, A2, D3
+      bass: [73.42, 110.00, 146.83],
+
+      // Le Calamar D minor scale across 2 octaves
+      // D E F G A Bb C D E F G A Bb C D
+      mid: [
+        146.83, 164.81, 174.61, 196.00, 220.00, 233.08, 261.63,  // D3-C4
+        293.66, 329.63, 349.23, 392.00, 440.00, 466.16, 523.25,  // D4-C5
+      ],
+
+      // High shimmer notes — D and A octaves for purity
+      high: [587.33, 659.25, 698.46, 880.00, 1174.66],
+
+      // Phrygian color tones (Eb/Bb) for spaghetti western flavor
+      phrygian: [155.56, 233.08, 311.13, 466.16],
+
+      // Dorian color (B natural) for French chanson brightness
+      dorian: [246.94, 493.88],
+    };
+  }
+
+  // === VOICE TYPES ===
+
+  // 1. DRONE — Low D/A pad, Eno-style infinite sustain
+  playDrone() {
+    const freqs = this.getScaleFreqs();
+    const freq = freqs.bass[Math.floor(Math.random() * freqs.bass.length)];
+    const duration = 15 + Math.random() * 20; // 15-35 seconds
+
+    const osc = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    // Two detuned oscillators for warmth
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc2.type = 'sine';
+    osc2.frequency.value = freq * 1.002; // Slight detune — analog warmth
+
+    // Very slow attack and release
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.12, this.ctx.currentTime + 4);
+    gain.gain.setValueAtTime(0.12, this.ctx.currentTime + duration - 5);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+
+    osc.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.warmth);
+
+    osc.start();
+    osc2.start();
+    osc.stop(this.ctx.currentTime + duration);
+    osc2.stop(this.ctx.currentTime + duration);
+
+    this.activeNodes.push(osc, osc2);
+  }
+
+  // 2. GUITAR BELL — Plucked harmonic-rich tone with spring reverb (surf DNA)
+  playGuitarBell() {
+    const freqs = this.getScaleFreqs();
+    const pool = [...freqs.mid, ...freqs.high];
+    const freq = pool[Math.floor(Math.random() * pool.length)];
+    const duration = 4 + Math.random() * 6;
+
+    // FM synthesis for bell-like harmonics (guitar harmonic simulation)
+    const carrier = this.ctx.createOscillator();
+    const modulator = this.ctx.createOscillator();
+    const modGain = this.ctx.createGain();
+    const gain = this.ctx.createGain();
+
+    carrier.type = 'sine';
+    carrier.frequency.value = freq;
+    modulator.type = 'sine';
+    modulator.frequency.value = freq * 2.01; // Near-integer ratio for metallic quality
+    modGain.gain.value = freq * 0.5; // Modulation depth
+
+    modulator.connect(modGain);
+    modGain.connect(carrier.frequency);
+
+    // Sharp attack, exponential decay — plucked string character
+    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+
+    carrier.connect(gain);
+    gain.connect(this.warmth);
+
+    carrier.start();
+    modulator.start();
+    carrier.stop(this.ctx.currentTime + duration);
+    modulator.stop(this.ctx.currentTime + duration);
+
+    this.activeNodes.push(carrier, modulator);
+  }
+
+  // 3. TREMOLO PAD — Slow amplitude modulation (surf tremolo guitar DNA)
+  playTremoloPad() {
+    const freqs = this.getScaleFreqs();
+    const pool = freqs.mid.slice(0, 7); // Lower mid range
+    const freq = pool[Math.floor(Math.random() * pool.length)];
+    const duration = 10 + Math.random() * 15;
+
+    const osc = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const tremoloOsc = this.ctx.createOscillator();
+    const tremoloGain = this.ctx.createGain();
+
+    // Triangle wave for warmth
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    osc2.type = 'sine';
+    osc2.frequency.value = freq * 2.005; // Octave + slight detune
+
+    // Tremolo LFO — 3-6 Hz (classic surf tremolo speed)
+    tremoloOsc.type = 'sine';
+    tremoloOsc.frequency.value = 3 + Math.random() * 3;
+    tremoloGain.gain.value = 0.03; // Subtle tremolo depth
+
+    tremoloOsc.connect(tremoloGain);
+    tremoloGain.connect(gain.gain);
+
+    // Slow fade in and out
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.06, this.ctx.currentTime + 3);
+    gain.gain.setValueAtTime(0.06, this.ctx.currentTime + duration - 4);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+
+    osc.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.warmth);
+
+    osc.start();
+    osc2.start();
+    tremoloOsc.start();
+    osc.stop(this.ctx.currentTime + duration);
+    osc2.stop(this.ctx.currentTime + duration);
+    tremoloOsc.stop(this.ctx.currentTime + duration);
+
+    this.activeNodes.push(osc, osc2, tremoloOsc);
+  }
+
+  // 4. CINEMATIC SWELL — Morricone-style slow string rise
+  playCinematicSwell() {
+    const freqs = this.getScaleFreqs();
+    // Use Phrygian or Dorian color tones 30% of the time
+    let pool;
+    const r = Math.random();
+    if (r < 0.15) {
+      pool = freqs.phrygian; // Spaghetti western tension
+    } else if (r < 0.25) {
+      pool = freqs.dorian; // French chanson brightness
+    } else {
+      pool = freqs.mid.slice(3, 10); // Core D minor
+    }
+    const freq = pool[Math.floor(Math.random() * pool.length)];
+    const duration = 12 + Math.random() * 18;
+    const peak = duration * (0.3 + Math.random() * 0.4); // Peak between 30-70%
+
+    const osc = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    // Sawtooth for string-like harmonic richness, heavily filtered
+    osc.type = 'sawtooth';
+    osc.frequency.value = freq;
+    osc2.type = 'sawtooth';
+    osc2.frequency.value = freq * 0.998; // Chorus detune
+
+    // Local filter for this voice — strings are warmer than bells
+    const localFilter = this.ctx.createBiquadFilter();
+    localFilter.type = 'lowpass';
+    localFilter.frequency.value = 1200;
+    localFilter.Q.value = 0.7;
+    // Filter opens slightly as note swells
+    localFilter.frequency.linearRampToValueAtTime(2000, this.ctx.currentTime + peak);
+    localFilter.frequency.linearRampToValueAtTime(800, this.ctx.currentTime + duration);
+
+    // Slow rise to peak, then gentle fall
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, this.ctx.currentTime + peak);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+
+    osc.connect(localFilter);
+    osc2.connect(localFilter);
+    localFilter.connect(gain);
+    gain.connect(this.warmth);
+
+    osc.start();
+    osc2.start();
+    osc.stop(this.ctx.currentTime + duration);
+    osc2.stop(this.ctx.currentTime + duration);
+
+    this.activeNodes.push(osc, osc2);
+  }
+
+  // 5. GHOST PERCUSSION — Barely perceptible rhythmic pulse (Afrobeat groove DNA)
+  playGhostPerc() {
+    const duration = 8 + Math.random() * 12;
+    const bpm = 95 + Math.random() * 15; // 95-110 BPM — Le Calamar sweet spot
+    const interval = 60 / bpm;
+    const hits = Math.floor(duration / interval);
+
+    for (let i = 0; i < hits; i++) {
+      const time = this.ctx.currentTime + (i * interval);
+      // Skip some beats for organic feel (not a strict pattern)
+      if (Math.random() < 0.4) continue;
+
+      const noise = this.ctx.createBufferSource();
+      const noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.05, this.ctx.sampleRate);
+      const noiseData = noiseBuffer.getChannelData(0);
+      for (let j = 0; j < noiseData.length; j++) {
+        noiseData[j] = (Math.random() * 2 - 1);
+      }
+      noise.buffer = noiseBuffer;
+
+      const perc_filter = this.ctx.createBiquadFilter();
+      perc_filter.type = 'bandpass';
+      perc_filter.frequency.value = 800 + Math.random() * 2000;
+      perc_filter.Q.value = 3;
+
+      const percGain = this.ctx.createGain();
+      // Very quiet — this should be felt more than heard
+      const vol = 0.008 + Math.random() * 0.012;
+      percGain.gain.setValueAtTime(vol, time);
+      percGain.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
+
+      // Fade the whole pattern in and out
+      const progress = i / hits;
+      const envelope = Math.sin(progress * Math.PI); // Bell curve
+      percGain.gain.value *= envelope;
+
+      noise.connect(perc_filter);
+      perc_filter.connect(percGain);
+      percGain.connect(this.warmth);
+
+      noise.start(time);
+      noise.stop(time + 0.05);
+      this.activeNodes.push(noise);
+    }
+  }
+
+  // 6. SHIMMER — High octave harmonic, crystalline (Eno)
+  playShimmer() {
+    const freqs = this.getScaleFreqs();
+    const freq = freqs.high[Math.floor(Math.random() * freqs.high.length)];
+    const duration = 6 + Math.random() * 10;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+
+    // Very quiet, ethereal
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.02, this.ctx.currentTime + 2);
+    gain.gain.setValueAtTime(0.02, this.ctx.currentTime + duration - 3);
+    gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(this.warmth);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + duration);
+
+    this.activeNodes.push(osc);
+  }
+
+  // === ENGINE CONTROL ===
+
+  start() {
+    if (!this.ctx) this.init();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    this.running = true;
+
+    // Schedule voices with Eno-style independent loops
+    // Each voice type has its own interval — they drift in and out of phase
+    // creating non-repeating combinations
+
+    const schedule = (fn, minInterval, maxInterval) => {
+      const play = () => {
+        if (!this.running) return;
+        fn.call(this);
+        const next = (minInterval + Math.random() * (maxInterval - minInterval)) * 1000;
+        const timer = setTimeout(play, next);
+        this.timers.push(timer);
+      };
+      play();
+    };
+
+    // Voice scheduling — intervals in seconds
+    // Drones: every 18-35s (the constant bed)
+    schedule(this.playDrone, 18, 35);
+
+    // Guitar bells: every 5-12s (the surf sparkle)
+    schedule(this.playGuitarBell, 5, 12);
+
+    // Tremolo pads: every 14-28s (the surf warmth)
+    schedule(this.playTremoloPad, 14, 28);
+
+    // Cinematic swells: every 20-45s (the Morricone space)
+    schedule(this.playCinematicSwell, 20, 45);
+
+    // Ghost percussion: every 15-30s (the Afrobeat pulse)
+    schedule(this.playGhostPerc, 15, 30);
+
+    // Shimmer: every 8-18s (the Eno crystal)
+    schedule(this.playShimmer, 8, 18);
+
+    // Activate orbs
+    document.querySelectorAll('.orb').forEach((orb, i) => {
+      setTimeout(() => orb.classList.add('active'), i * 800);
+      // Drift orbs slowly
+      this.animateOrb(orb);
+    });
+  }
+
+  stop() {
+    this.running = false;
+    this.timers.forEach(t => clearTimeout(t));
+    this.timers = [];
+
+    // Fade out
+    if (this.master) {
+      this.master.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 2);
+      setTimeout(() => {
+        this.activeNodes.forEach(n => { try { n.stop(); } catch(e) {} });
+        this.activeNodes = [];
+        if (this.master) this.master.gain.value = 0.6;
+      }, 2500);
+    }
+
+    // Deactivate orbs
+    document.querySelectorAll('.orb').forEach(orb => orb.classList.remove('active'));
+  }
+
+  setVolume(v) {
+    if (this.master) {
+      this.master.gain.linearRampToValueAtTime(v, this.ctx.currentTime + 0.1);
+    }
+  }
+
+  animateOrb(orb) {
+    const drift = () => {
+      if (!this.running) return;
+      const x = (Math.random() - 0.5) * 60;
+      const y = (Math.random() - 0.5) * 60;
+      const dur = 8000 + Math.random() * 12000;
+      orb.style.transition = `transform ${dur}ms ease-in-out, opacity 4s ease`;
+      orb.style.transform = `translate(${x}px, ${y}px)`;
+      setTimeout(drift, dur);
+    };
+    drift();
+  }
+}
+
+// === UI ===
+const engine = new LeCalamEngine();
+let isPlaying = false;
+
+function toggleAudio() {
+  if (!isPlaying) {
+    engine.start();
+    document.getElementById('playIcon').style.display = 'none';
+    document.getElementById('pauseIcon').style.display = 'block';
+    document.getElementById('playBtn').classList.add('playing');
+    document.getElementById('volWrap').classList.add('visible');
+  } else {
+    engine.stop();
+    document.getElementById('playIcon').style.display = 'block';
+    document.getElementById('pauseIcon').style.display = 'none';
+    document.getElementById('playBtn').classList.remove('playing');
+  }
+  isPlaying = !isPlaying;
+}
+
+function setVol(v) {
+  engine.setVolume(v / 100 * 0.8);
+}
+
+// Register service worker for PWA support
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(err => {
+    // Silently fail if service worker registration fails
+  });
+}
+
+// === SQUARESPACE CODE INJECTION VERSION ===
+// To embed as a floating widget on Squarespace, wrap the player
+// in a div with class "sq-widget" and inject via Code Injection > Footer.
+// The CSS above handles the compact layout automatically.
+</script>
+
+</body>
+</html>
